@@ -1,0 +1,1619 @@
+```html
+<!DOCTYPE html>
+<html lang="ru" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Школьный Игровой Портал — 8-в-1</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&family=Nunito:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            purple: '#7C3AED',
+                            pink: '#EC4899',
+                            yellow: '#F59E0B',
+                            blue: '#3B82F6',
+                            green: '#10B981',
+                            dark: '#0F172A'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'],
+                        heading: ['Comfortaa', 'cursive']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+            min-height: 100vh;
+            color: #f8fafc;
+        }
+
+        .heading-font {
+            font-family: 'Comfortaa', cursive;
+        }
+
+        /* Glassmorphism utility */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03));
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5deg) scale(1.02);
+            border-color: rgba(236, 72, 153, 0.5);
+            box-shadow: 0 12px 30px rgba(124, 58, 237, 0.3);
+        }
+
+        /* 3D Button style */
+        .btn-3d {
+            transition: all 0.15s ease;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.3);
+        }
+        .btn-3d:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.3);
+        }
+
+        /* 15 Puzzle board animation */
+        .tile-slide {
+            transition: transform 0.2s ease-in-out, background-color 0.2s ease;
+        }
+
+        /* Card Flip 3D */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(124, 58, 237, 0.5);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(236, 72, 153, 0.8);
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { filter: drop-shadow(0 0 15px rgba(245, 158, 11, 0.6)); }
+            50% { filter: drop-shadow(0 0 25px rgba(236, 72, 153, 0.9)); }
+        }
+        .glow-effect {
+            animation: pulse-glow 3s infinite;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col justify-between overflow-x-hidden selection:bg-pink-500 selection:text-white">
+
+    <!-- TOP NAVIGATION BAR -->
+    <header class="sticky top-0 z-40 glass-panel border-b border-slate-700/50 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            <!-- Brand / Back to Home -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="app.showHome()">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 to-pink-500 flex items-center justify-center text-white text-xl font-black shadow-lg shadow-purple-500/30">
+                    <i class="fa-solid fa-gamepad"></i>
+                </div>
+                <div>
+                    <h1 class="heading-font font-bold text-lg md:text-xl text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400">
+                        Классный Портал
+                    </h1>
+                    <p class="text-xs text-slate-400 font-semibold hidden sm:block">Центр развивающих игр</p>
+                </div>
+            </div>
+
+            <!-- Stats Header Controls -->
+            <div class="flex items-center gap-3 sm:gap-6">
+                <!-- XP Level Progress -->
+                <div class="hidden md:flex flex-col w-32">
+                    <div class="flex justify-between text-xs font-bold text-purple-300 mb-1">
+                        <span>Уровень <span id="user-level">1</span></span>
+                        <span id="user-xp-text">0/100 XP</span>
+                    </div>
+                    <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+                        <div id="user-xp-bar" class="h-full bg-gradient-to-r from-purple-500 to-pink-500 w-0 transition-all duration-500"></div>
+                    </div>
+                </div>
+
+                <!-- Coins Counter -->
+                <div class="flex items-center gap-2 bg-slate-800/80 border border-amber-500/40 px-3 py-1.5 rounded-full shadow-inner">
+                    <i class="fa-solid fa-coins text-amber-400 text-lg animate-bounce"></i>
+                    <span id="user-coins" class="font-extrabold text-amber-300 text-sm sm:text-base">0</span>
+                </div>
+
+                <!-- Shop Button -->
+                <button onclick="app.openShop()" class="btn-3d bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-slate-900 font-extrabold px-3 sm:px-4 py-1.5 rounded-xl flex items-center gap-2 text-sm">
+                    <i class="fa-solid fa-store"></i>
+                    <span class="hidden sm:inline">Магазин</span>
+                </button>
+
+                <!-- Sound Toggle -->
+                <button id="sound-btn" onclick="soundManager.toggle()" class="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-700 transition">
+                    <i class="fa-solid fa-volume-high text-sm"></i>
+                </button>
+
+                <!-- Profile Badge & Certificate Trigger -->
+                <button onclick="app.openCertModal()" class="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 p-0.5 shadow-md hover:scale-105 transition" title="Получить сертификат">
+                    <div id="user-avatar-display" class="w-full h-full bg-slate-900 rounded-full flex items-center justify-center text-xl">
+                        🎓
+                    </div>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 my-2">
+        <!-- APP DASHBOARD (HOME SCREEN) -->
+        <section id="view-home" class="space-y-8">
+            <!-- Hero Banner -->
+            <div class="relative rounded-3xl overflow-hidden p-6 md:p-10 glass-panel border border-purple-500/30 bg-gradient-to-r from-purple-900/40 via-pink-900/30 to-slate-900/80">
+                <div class="relative z-10 max-w-2xl space-y-3">
+                    <span class="bg-pink-500/20 text-pink-300 border border-pink-500/40 text-xs font-black uppercase px-3 py-1 rounded-full tracking-wider">Обучение & Развлечения</span>
+                    <h2 class="heading-font text-2xl md:text-4xl font-extrabold text-white leading-tight">
+                        Играй, развивайся и получай дипломы!
+                    </h2>
+                    <p class="text-slate-300 text-sm md:text-base">
+                        Пройди 8 умных игр, зарабатывай монетки, открывай призы в магазине и получи официальный сертификат успеха!
+                    </p>
+                    <div class="pt-2 flex flex-wrap gap-3">
+                        <button onclick="app.scrollToGames()" class="btn-3d bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white font-bold px-6 py-2.5 rounded-2xl shadow-lg flex items-center gap-2">
+                            <i class="fa-solid fa-rocket"></i> Выбрать игру
+                        </button>
+                        <button onclick="app.openCertModal()" class="btn-3d bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/40 font-bold px-5 py-2.5 rounded-2xl flex items-center gap-2">
+                            <i class="fa-solid fa-award text-amber-400"></i> Мой Сертификат
+                        </button>
+                    </div>
+                </div>
+                <!-- Banner Decoration Graphic -->
+                <div class="hidden lg:block absolute -right-6 -bottom-10 text-9xl opacity-20 pointer-events-none select-none glow-effect">
+                    🏆
+                </div>
+            </div>
+
+            <!-- Games Grid Selection -->
+            <div id="games-section">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="heading-font text-xl md:text-2xl font-bold text-white flex items-center gap-3">
+                        <i class="fa-solid fa-shapes text-pink-400"></i> Каталог Развивающих Игр
+                    </h3>
+                    <span class="text-xs text-slate-400 font-semibold">Доступно: 8 игр</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Game Card 1: Memory Match -->
+                    <div onclick="app.launchGame('memory')" class="glass-card rounded-2xl p-5 flex flex-col justify-between cursor-pointer group">
+                        <div>
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-500 to-cyan-400 flex items-center justify-center text-2xl text-white mb-4 shadow-lg group-hover:scale-110 transition">
+                                🎴
+                            </div>
+                            <h4 class="font-bold text-lg text-white mb-1">Найди совпадение</h4>
+                            <p class="text-slate-400 text-xs mb-4">Тренируй зрительную память и внимание, сбирая парные карточки.</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-3 border-t border-slate-700/50 text-xs">
+                            <span class="text-cyan-300 font-bold"><i class="fa-solid fa-star mr-1"></i> Память</span>
+                            <span class="bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-md font-semibold">3 Уровня</span>
+                        </div>
+                    </div>
+
+                    <!-- Game Card 2: Guess Number -->
+                    <div onclick="app.launchGame('guess')" class="glass-card rounded-2xl p-5 flex flex-col justify-between cursor-pointer group">
+                        <div>
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-400 flex items-center justify-center text-2xl text-white mb-4 shadow-lg group-hover:scale-110 transition">
+                                🔢
+                            </div>
+                            <h4 class="font-bold text-lg text-white mb-1">Угадай число</h4>
+                            <p class="text-slate-400 text-xs mb-4">Логика и интуиция! Используй подсказки "Горячо/Холодно".</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-3 border-t border-slate-700/50 text-xs">
+                            <span class="text-amber-300 font-bold"><i class="fa-solid fa-bullseye mr-1"></i> Интуиция</span>
+                            <span class="bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-md font-semibold">1-500</span>
+                        </div>
+                    </div>
+
+                    <!-- Game Card 3: 15 Puzzle -->
+                    <div onclick="app.launchGame('fifteen')" class="glass-card rounded-2xl p-5 flex flex-col justify-between cursor-pointer group">
+                        <div>
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-2xl text-white mb-4 shadow-lg group-hover:scale-110 transition">
+                                🧩
+                            </div>
+                            <h4 class="font-bold text-lg text-white mb-1">Пятнашки</h4>
+                            <p class="text-slate-400 text-xs mb-4">Классическая головоломка 4x4. Расставьте числа по порядку!</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-3 border-t border-slate-700/50 text-xs">
+                            <span class="text-emerald-300 font-bold"><i class="fa-solid fa-brain mr-1"></i> Логика</span>
+                            <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-md font-semibold">4x4 Поле</span>
+                        </div>
+                    </div>
+
+                    <!-- Game Card 4: Sudoku -->
+                    <div onclick="app.launchGame('sudoku')" class="glass-card rounded-2xl p-5 flex flex-col justify-between cursor-pointer group">
+                        <div>
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-400 flex items-center justify-center text-2xl text-white mb-4 shadow-lg group-hover:scale-110 transition">
+                                📐
+                            </div>
+                            <h4 class="font-bold text-lg text-white mb-1">Судоку</h4>
+                            <p class="text-slate-400 text-xs mb-4">Японский числовой кроссворд 9x9. Развивает мышление.</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-3 border-t border-slate-700/50 text-xs">
+                            <span class="text-indigo-300 font-bold"><i class="fa-solid fa-square-full mr-1"></i> Математика</span>
+                            <span class="bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-md font-semibold">3 Сложности</span>
+                        </div>
+                    </div>
+
+                    <!-- Game Card 5: Quiz -->
+                    <div onclick="app.launchGame('quiz')" class="glass-card rounded-2xl p-5 flex flex-col justify-between cursor-pointer group">
+                        <div>
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-rose-500 to-red-400 flex items-center justify-center text-2xl text-white mb-4 shadow-lg group-hover:scale-110 transition">
+                                💡
+                            </div>
+                            <h4 class="font-bold text-lg text-white mb-1">Викторина</h4>
+                            <p class="text-slate-400 text-xs mb-4">Интересные вопросы из разных школьных предметов.</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-3 border-t border-slate-700/50 text-xs">
+                            <span class="text-rose-300 font-bold"><i class="fa-solid fa-graduation-cap mr-1"></i> Эрудиция</span>
+                            <span class="bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded-md font-semibold">10 Вопросов</span>
+                        </div>
+                    </div>
+
+                    <!-- Game Card 6: Field of Wonders -->
+                    <div onclick="app.launchGame('wheel')" class="glass-card rounded-2xl p-5 flex flex-col justify-between cursor-pointer group">
+                        <div>
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-yellow-500 to-amber-400 flex items-center justify-center text-2xl text-white mb-4 shadow-lg group-hover:scale-110 transition">
+                                🎡
+                            </div>
+                            <h4 class="font-bold text-lg text-white mb-1">Поле Чудес</h4>
+                            <p class="text-slate-400 text-xs mb-4">Крутите барабан, угадывайте буквы и зашифрованные слова!</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-3 border-t border-slate-700/50 text-xs">
+                            <span class="text-yellow-300 font-bold"><i class="fa-solid fa-font mr-1"></i> Словарный запас</span>
+                            <span class="bg-yellow-500/20 text-yellow-300 px-2 py-0.5 rounded-md font-semibold">Барабан</span>
+                        </div>
+                    </div>
+
+                    <!-- Game Card 7: Millionaire -->
+                    <div onclick="app.launchGame('millionaire')" class="glass-card rounded-2xl p-5 flex flex-col justify-between cursor-pointer group">
+                        <div>
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-2xl text-white mb-4 shadow-lg group-hover:scale-110 transition">
+                                💎
+                            </div>
+                            <h4 class="font-bold text-lg text-white mb-1">Кто хочет стать миллионером</h4>
+                            <p class="text-slate-400 text-xs mb-4">15 ступеней к вершине, подсказки и супер-приз!</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-3 border-t border-slate-700/50 text-xs">
+                            <span class="text-cyan-300 font-bold"><i class="fa-solid fa-trophy mr-1"></i> Шоу-викторина</span>
+                            <span class="bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded-md font-semibold">3 Подсказки</span>
+                        </div>
+                    </div>
+
+                    <!-- Game Card 8: Own Game / Jeopardy -->
+                    <div onclick="app.launchGame('jeopardy')" class="glass-card rounded-2xl p-5 flex flex-col justify-between cursor-pointer group">
+                        <div>
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-purple-500 to-indigo-600 flex items-center justify-center text-2xl text-white mb-4 shadow-lg group-hover:scale-110 transition">
+                                🎯
+                            </div>
+                            <h4 class="font-bold text-lg text-white mb-1">Своя Игра</h4>
+                            <p class="text-slate-400 text-xs mb-4">Выбирайте темы, рискуйте очками и побеждайте!</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-3 border-t border-slate-700/50 text-xs">
+                            <span class="text-purple-300 font-bold"><i class="fa-solid fa-layer-group mr-1"></i> Стратегия</span>
+                            <span class="bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-md font-semibold">Темы 100-500</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- GENERIC GAME CONTAINER (HOSTS ALL Mini-GAMES) -->
+        <section id="view-game" class="hidden space-y-4">
+            <!-- Header back toolbar -->
+            <div class="flex items-center justify-between bg-slate-800/80 p-4 rounded-2xl border border-slate-700">
+                <button onclick="app.showHome()" class="btn-3d bg-slate-700 hover:bg-slate-600 text-white font-bold px-4 py-2 rounded-xl text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i> Меню
+                </button>
+                <h3 id="current-game-title" class="heading-font font-bold text-lg sm:text-xl text-white text-center">
+                    Название Игры
+                </h3>
+                <button onclick="app.restartCurrentGame()" class="btn-3d bg-purple-600 hover:bg-purple-500 text-white font-bold px-3 sm:px-4 py-2 rounded-xl text-sm flex items-center gap-1.5" title="Заново">
+                    <i class="fa-solid fa-rotate-right"></i> <span class="hidden sm:inline">Заново</span>
+                </button>
+            </div>
+
+            <!-- DYNAMIC GAME PLAY AREA -->
+            <div id="game-stage" class="glass-panel p-4 md:p-8 rounded-3xl min-h-[500px] flex items-center justify-center relative overflow-hidden">
+                <!-- Individual Game UIs get injected here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="glass-panel border-t border-slate-800 py-4 px-6 text-center text-xs text-slate-400">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p>© 2026 Интерактивный Школьный Класс. Все права защищены.</p>
+            <p class="flex items-center gap-2">
+                <span>Учитесь играя!</span>
+                <i class="fa-solid fa-heart text-pink-500"></i>
+            </p>
+        </div>
+    </footer>
+
+    <!-- MODAL: SHOP -->
+    <div id="modal-shop" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel border border-amber-500/40 rounded-3xl max-w-xl w-full p-6 space-y-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-slate-700 pb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl font-bold">
+                        🛒
+                    </div>
+                    <div>
+                        <h3 class="heading-font font-bold text-xl text-white">Магазин Плюшек</h3>
+                        <p class="text-xs text-slate-400">Покупайте аватарки и бонусы за заработанные монеты</p>
+                    </div>
+                </div>
+                <button onclick="app.closeModal('modal-shop')" class="text-slate-400 hover:text-white text-xl">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Avatars Section -->
+            <div class="space-y-3">
+                <h4 class="font-bold text-sm text-amber-300 uppercase tracking-wider">Коллекция Аватарок</h4>
+                <div class="grid grid-cols-4 gap-3" id="shop-avatars">
+                    <!-- Dynamic avatars -->
+                </div>
+            </div>
+
+            <!-- Powerups Section -->
+            <div class="space-y-3 pt-2">
+                <h4 class="font-bold text-sm text-purple-300 uppercase tracking-wider">Бонусы и Плюшки</h4>
+                <div class="space-y-2" id="shop-perks">
+                    <!-- Dynamic perks -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CERTIFICATE GENERATOR -->
+    <div id="modal-cert" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel border border-purple-500/40 rounded-3xl max-w-3xl w-full p-6 space-y-4 max-h-[95vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center text-xl font-bold">
+                        📜
+                    </div>
+                    <div>
+                        <h3 class="heading-font font-bold text-xl text-white">Сертификат Достижений</h3>
+                        <p class="text-xs text-slate-400">Именной диплом за успехи в играх</p>
+                    </div>
+                </div>
+                <button onclick="app.closeModal('modal-cert')" class="text-slate-400 hover:text-white text-xl">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Certificate Controls -->
+            <div class="flex flex-col sm:flex-row gap-3 items-center justify-between bg-slate-800/60 p-3 rounded-2xl border border-slate-700">
+                <div class="w-full sm:w-auto flex-grow">
+                    <label class="block text-xs text-slate-400 mb-1 font-semibold">Имя и Фамилия Ученика:</label>
+                    <input type="text" id="cert-student-name" value="Ученик Класса" oninput="app.renderCertificate()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-white font-bold focus:outline-none focus:border-purple-500 text-sm">
+                </div>
+                <div class="flex gap-2 w-full sm:w-auto justify-end pt-2 sm:pt-0">
+                    <button onclick="app.downloadCert()" class="btn-3d bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-download"></i> Скачать
+                    </button>
+                    <button onclick="app.printCert()" class="btn-3d bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2 rounded-xl text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-print"></i> Печать
+                    </button>
+                </div>
+            </div>
+
+            <!-- Canvas Certificate Preview -->
+            <div class="flex justify-center border-2 border-dashed border-slate-700 p-2 rounded-2xl bg-slate-900/50">
+                <canvas id="cert-canvas" width="800" height="560" class="max-w-full h-auto rounded-xl shadow-2xl"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- CELEBRATION / CONFETTI CANVAS OVERLAY -->
+    <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50"></canvas>
+
+    <!-- JS LOGIC & GAMES CODE -->
+    <script>
+        /* ==========================================================================
+           1. SYNTHESIZED AUDIO MANAGER (WEB AUDIO API - NO EXTERNAL ASSETS NEEDED)
+           ========================================================================== */
+        class SoundFX {
+            constructor() {
+                this.ctx = null;
+                this.muted = false;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            toggle() {
+                this.muted = !this.muted;
+                const btn = document.getElementById('sound-btn');
+                if (this.muted) {
+                    btn.innerHTML = '<i class="fa-solid fa-volume-xmark text-rose-400 text-sm"></i>';
+                } else {
+                    btn.innerHTML = '<i class="fa-solid fa-volume-high text-sm"></i>';
+                    this.playClick();
+                }
+            }
+
+            playTone(freq, duration, type = 'sine', startVol = 0.2, endVol = 0) {
+                if (this.muted) return;
+                this.init();
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = type;
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(startVol, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(Math.max(endVol, 0.0001), this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch(e) {}
+            }
+
+            playClick() {
+                this.playTone(600, 0.05, 'triangle', 0.15);
+            }
+
+            playSuccess() {
+                if (this.muted) return;
+                const notes = [440, 554.37, 659.25, 880];
+                notes.forEach((freq, idx) => {
+                    setTimeout(() => this.playTone(freq, 0.2, 'sine', 0.25), idx * 80);
+                });
+            }
+
+            playError() {
+                if (this.muted) return;
+                this.playTone(180, 0.15, 'sawtooth', 0.3);
+                setTimeout(() => this.playTone(130, 0.25, 'sawtooth', 0.3), 100);
+            }
+
+            playFlip() {
+                this.playTone(400, 0.04, 'sine', 0.1);
+            }
+
+            playSpin() {
+                this.playTone(800, 0.03, 'square', 0.05);
+            }
+
+            playFanfare() {
+                if (this.muted) return;
+                const melody = [
+                    {f: 523.25, d: 0.15}, {f: 523.25, d: 0.15}, {f: 523.25, d: 0.15}, 
+                    {f: 659.25, d: 0.4}, {f: 783.99, d: 0.5}
+                ];
+                let delay = 0;
+                melody.forEach(item => {
+                    setTimeout(() => this.playTone(item.f, item.d, 'triangle', 0.3), delay);
+                    delay += item.d * 1000 + 30;
+                });
+            }
+        }
+
+        const soundManager = new SoundFX();
+
+        /* ==========================================================================
+           2. CONFETTI EFFECT SYSTEM
+           ========================================================================== */
+        class ConfettiSystem {
+            constructor() {
+                this.canvas = document.getElementById('confetti-canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.particles = [];
+                this.animating = false;
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+            }
+
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+
+            launch(count = 80) {
+                const colors = ['#f59e0b', '#ec4899', '#3b82f6', '#10b981', '#8b5cf6'];
+                for (let i = 0; i < count; i++) {
+                    this.particles.push({
+                        x: window.innerWidth / 2,
+                        y: window.innerHeight / 2,
+                        vx: (Math.random() - 0.5) * 16,
+                        vy: (Math.random() - 0.8) * 16,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        size: Math.random() * 8 + 4,
+                        rotation: Math.random() * 360,
+                        vRot: (Math.random() - 0.5) * 10,
+                        life: 1
+                    });
+                }
+                if (!this.animating) {
+                    this.animating = true;
+                    this.loop();
+                }
+            }
+
+            loop() {
+                if (!this.animating) return;
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    const p = this.particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.3; // Gravity
+                    p.rotation += p.vRot;
+                    p.life -= 0.015;
+
+                    this.ctx.save();
+                    this.ctx.translate(p.x, p.y);
+                    this.ctx.rotate((p.rotation * Math.PI) / 180);
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.globalAlpha = Math.max(0, p.life);
+                    this.ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                    this.ctx.restore();
+
+                    if (p.life <= 0) {
+                        this.particles.splice(i, 1);
+                    }
+                }
+
+                if (this.particles.length > 0) {
+                    requestAnimationFrame(() => this.loop());
+                } else {
+                    this.animating = false;
+                }
+            }
+        }
+
+        const confetti = new ConfettiSystem();
+
+        /* ==========================================================================
+           3. MAIN APPLICATION STATE & PORTAL MANAGEMENT
+           ========================================================================== */
+        class PortalApp {
+            constructor() {
+                this.state = {
+                    coins: 150,
+                    xp: 0,
+                    level: 1,
+                    avatar: '🎓',
+                    unlockedAvatars: ['🎓', '🚀'],
+                    currentGame: null
+                };
+
+                this.avatarsList = [
+                    { emoji: '🎓', name: 'Выпускник', price: 0 },
+                    { emoji: '🚀', name: 'Космонавт', price: 0 },
+                    { emoji: '🦁', name: 'Царь зверей', price: 50 },
+                    { emoji: '🧙‍♂️', name: 'Вошебник', price: 100 },
+                    { emoji: '🤖', name: 'Робот', price: 150 },
+                    { emoji: '🦄', name: 'Единорог', price: 200 },
+                    { emoji: '👑', name: 'Король', price: 300 }
+                ];
+
+                this.perksList = [
+                    { id: 'theme_neon', name: 'Неоновая тема', desc: 'Красочная подсветка интерфейса', price: 100 },
+                    { id: 'hint_pack', name: 'Пакет подсказок', desc: '+3 подсказки в сложных играх', price: 80 }
+                ];
+
+                this.init();
+            }
+
+            init() {
+                this.updateUI();
+                this.renderShop();
+                this.renderCertificate();
+            }
+
+            addCoins(amount) {
+                this.state.coins += amount;
+                this.addXP(Math.floor(amount / 2));
+                this.updateUI();
+            }
+
+            addXP(amount) {
+                this.state.xp += amount;
+                const neededXP = this.state.level * 100;
+                if (this.state.xp >= neededXP) {
+                    this.state.xp -= neededXP;
+                    this.state.level++;
+                    soundManager.playFanfare();
+                    confetti.launch(100);
+                }
+                this.updateUI();
+            }
+
+            updateUI() {
+                document.getElementById('user-coins').innerText = this.state.coins;
+                document.getElementById('user-level').innerText = this.state.level;
+                const neededXP = this.state.level * 100;
+                document.getElementById('user-xp-text').innerText = `${this.state.xp}/${neededXP} XP`;
+                const pct = Math.min(100, (this.state.xp / neededXP) * 100);
+                document.getElementById('user-xp-bar').style.width = `${pct}%`;
+                document.getElementById('user-avatar-display').innerText = this.state.avatar;
+            }
+
+            scrollToGames() {
+                document.getElementById('games-section').scrollIntoView({ behavior: 'smooth' });
+            }
+
+            showHome() {
+                soundManager.playClick();
+                document.getElementById('view-home').classList.remove('hidden');
+                document.getElementById('view-game').classList.add('hidden');
+                this.state.currentGame = null;
+            }
+
+            launchGame(gameKey) {
+                soundManager.playClick();
+                this.state.currentGame = gameKey;
+                document.getElementById('view-home').classList.add('hidden');
+                document.getElementById('view-game').classList.remove('hidden');
+
+                const titleElem = document.getElementById('current-game-title');
+                const stage = document.getElementById('game-stage');
+                stage.innerHTML = '';
+
+                switch (gameKey) {
+                    case 'memory':
+                        titleElem.innerText = 'Найди совпадение (Memory)';
+                        initMemoryGame(stage);
+                        break;
+                    case 'guess':
+                        titleElem.innerText = 'Угадай число';
+                        initGuessGame(stage);
+                        break;
+                    case 'fifteen':
+                        titleElem.innerText = 'Пятнашки 4x4';
+                        initFifteenGame(stage);
+                        break;
+                    case 'sudoku':
+                        titleElem.innerText = 'Судоку 9x9';
+                        initSudokuGame(stage);
+                        break;
+                    case 'quiz':
+                        titleElem.innerText = 'Школьная Викторина';
+                        initQuizGame(stage);
+                        break;
+                    case 'wheel':
+                        titleElem.innerText = 'Поле Чудес';
+                        initWheelGame(stage);
+                        break;
+                    case 'millionaire':
+                        titleElem.innerText = 'Кто хочет стать миллионером';
+                        initMillionaireGame(stage);
+                        break;
+                    case 'jeopardy':
+                        titleElem.innerText = 'Своя Игра';
+                        initJeopardyGame(stage);
+                        break;
+                }
+            }
+
+            restartCurrentGame() {
+                if (this.state.currentGame) {
+                    this.launchGame(this.state.currentGame);
+                }
+            }
+
+            /* SHOP SYSTEM */
+            openShop() {
+                soundManager.playClick();
+                document.getElementById('modal-shop').classList.remove('hidden');
+            }
+
+            closeModal(id) {
+                soundManager.playClick();
+                document.getElementById(id).classList.add('hidden');
+            }
+
+            renderShop() {
+                const avContainer = document.getElementById('shop-avatars');
+                avContainer.innerHTML = '';
+                this.avatarsList.forEach(av => {
+                    const isUnlocked = this.state.unlockedAvatars.includes(av.emoji);
+                    const isSelected = this.state.avatar === av.emoji;
+
+                    const card = document.createElement('div');
+                    card.className = `p-3 rounded-2xl flex flex-col items-center justify-between border transition text-center ${
+                        isSelected ? 'bg-purple-600/30 border-pink-500' : 'bg-slate-800/60 border-slate-700'
+                    }`;
+
+                    card.innerHTML = `
+                        <span class="text-3xl mb-1">${av.emoji}</span>
+                        <span class="text-xs font-bold text-white mb-2">${av.name}</span>
+                        ${
+                            isSelected ? '<span class="text-[10px] bg-pink-500 text-white px-2 py-0.5 rounded-full">Выбрано</span>' :
+                            isUnlocked ? `<button onclick="app.selectAvatar('${av.emoji}')" class="text-xs bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded-lg text-white font-bold w-full">Надеть</button>` :
+                            `<button onclick="app.buyAvatar('${av.emoji}', ${av.price})" class="text-xs bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold px-2 py-1 rounded-lg w-full flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-coins"></i> ${av.price}
+                            </button>`
+                        }
+                    `;
+                    avContainer.appendChild(card);
+                });
+
+                const perksContainer = document.getElementById('shop-perks');
+                perksContainer.innerHTML = '';
+                this.perksList.forEach(p => {
+                    const card = document.createElement('div');
+                    card.className = 'p-3 rounded-xl bg-slate-800/60 border border-slate-700 flex items-center justify-between';
+                    card.innerHTML = `
+                        <div>
+                            <h5 class="font-bold text-sm text-white">${p.name}</h5>
+                            <p class="text-xs text-slate-400">${p.desc}</p>
+                        </div>
+                        <button onclick="app.buyPerk('${p.id}', ${p.price})" class="btn-3d bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1">
+                            <i class="fa-solid fa-coins text-amber-400"></i> ${p.price}
+                        </button>
+                    `;
+                    perksContainer.appendChild(card);
+                });
+            }
+
+            selectAvatar(emoji) {
+                soundManager.playClick();
+                this.state.avatar = emoji;
+                this.updateUI();
+                this.renderShop();
+                this.renderCertificate();
+            }
+
+            buyAvatar(emoji, price) {
+                if (this.state.coins >= price) {
+                    soundManager.playSuccess();
+                    this.state.coins -= price;
+                    this.state.unlockedAvatars.push(emoji);
+                    this.state.avatar = emoji;
+                    this.updateUI();
+                    this.renderShop();
+                    this.renderCertificate();
+                } else {
+                    soundManager.playError();
+                    alert('Недостаточно монет! Играйте больше, чтобы заработать.');
+                }
+            }
+
+            buyPerk(id, price) {
+                if (this.state.coins >= price) {
+                    soundManager.playSuccess();
+                    this.state.coins -= price;
+                    this.updateUI();
+                    alert('Успешная покупка!');
+                } else {
+                    soundManager.playError();
+                    alert('Недостаточно монет!');
+                }
+            }
+
+            /* CERTIFICATE GENERATOR */
+            openCertModal() {
+                soundManager.playClick();
+                document.getElementById('modal-cert').classList.remove('hidden');
+                this.renderCertificate();
+            }
+
+            renderCertificate() {
+                const canvas = document.getElementById('cert-canvas');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                const studentName = document.getElementById('cert-student-name').value || 'Ученик Класса';
+
+                // Background
+                const grad = ctx.createLinearGradient(0, 0, 800, 560);
+                grad.addColorStop(0, '#0f172a');
+                grad.addColorStop(0.5, '#1e1b4b');
+                grad.addColorStop(1, '#311042');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, 800, 560);
+
+                // Gold Ornamental Border
+                ctx.strokeStyle = '#f59e0b';
+                ctx.lineWidth = 8;
+                ctx.strokeRect(20, 20, 760, 520);
+                ctx.strokeStyle = '#ec4899';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(28, 28, 744, 504);
+
+                // Header Badge / Icon
+                ctx.font = '50px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('🏆', 400, 90);
+
+                // Title
+                ctx.fillStyle = '#f59e0b';
+                ctx.font = 'bold 36px Comfortaa, cursive';
+                ctx.fillText('СЕРТИФИКАТ УСПЕХА', 400, 145);
+
+                ctx.fillStyle = '#cbd5e1';
+                ctx.font = '16px Nunito, sans-serif';
+                ctx.fillText('Настоящим подтверждается, что', 400, 185);
+
+                // Student Name
+                ctx.fillStyle = '#ec4899';
+                ctx.font = 'bold 34px Comfortaa, cursive';
+                ctx.fillText(studentName, 400, 240);
+
+                // Body text
+                ctx.fillStyle = '#f8fafc';
+                ctx.font = '18px Nunito, sans-serif';
+                ctx.fillText('успешно прошел развивающие игры, проявил логику,', 400, 290);
+                ctx.fillText('эрудицию и смекалку на Классном Портале!', 400, 320);
+
+                // Stats Summary Box
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+                ctx.fillRect(150, 350, 500, 90);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.strokeRect(150, 350, 500, 90);
+
+                ctx.fillStyle = '#fbbf24';
+                ctx.font = 'bold 20px Nunito, sans-serif';
+                ctx.fillText(`Достигнутый Уровень: ${this.state.level}  |  Монеты: ${this.state.coins}`, 400, 390);
+                ctx.fillStyle = '#a7f3d0';
+                ctx.font = '14px Nunito, sans-serif';
+                ctx.fillText('Звание: Мастер Интеллектуальных Игр', 400, 418);
+
+                // Footer
+                ctx.fillStyle = '#64748b';
+                ctx.font = '14px Nunito, sans-serif';
+                ctx.fillText(`Дата выдачи: ${new Date().toLocaleDateString('ru-RU')}`, 250, 490);
+                ctx.fillText('Школьный Игровой Портал 2026', 550, 490);
+            }
+
+            downloadCert() {
+                soundManager.playSuccess();
+                const canvas = document.getElementById('cert-canvas');
+                const link = document.createElement('a');
+                link.download = 'Сертификат_Успеха.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            }
+
+            printCert() {
+                soundManager.playClick();
+                const canvas = document.getElementById('cert-canvas');
+                const win = window.open('', '_blank');
+                win.document.write(`<img src="${canvas.toDataURL()}" style="width:100%"/>`);
+                win.document.close();
+                setTimeout(() => win.print(), 300);
+            }
+        }
+
+        /* ==========================================================================
+           4. MINI-GAME 1: NAYDI SOVPADENIE (MEMORY MATCH)
+           ========================================================================== */
+        function initMemoryGame(container) {
+            const icons = ['🐶', '🐱', '🦊', '🐼', '🦁', '🐸', '🦄', '🦉'];
+            let deck = [...icons, ...icons].sort(() => Math.random() - 0.5);
+            let flipped = [];
+            let matched = 0;
+            let moves = 0;
+
+            const html = `
+                <div class="w-full max-w-md mx-auto space-y-4 text-center">
+                    <div class="flex justify-between items-center bg-slate-800/80 p-3 rounded-xl border border-slate-700 text-sm font-bold">
+                        <span class="text-cyan-400">Ходов: <span id="mem-moves">0</span></span>
+                        <span class="text-pink-400">Найдено: <span id="mem-matched">0</span> / 8</span>
+                    </div>
+                    <div id="mem-grid" class="grid grid-cols-4 gap-3 perspective-1000"></div>
+                </div>
+            `;
+            container.innerHTML = html;
+
+            const grid = document.getElementById('mem-grid');
+            deck.forEach((emoji, idx) => {
+                const card = document.createElement('div');
+                card.className = 'h-20 sm:h-24 glass-card rounded-2xl flex items-center justify-center text-3xl sm:text-4xl cursor-pointer select-none border-2 border-slate-700 transition-all duration-300 transform-style-3d';
+                card.dataset.index = idx;
+                card.dataset.emoji = emoji;
+                card.innerHTML = `<span class="opacity-0 transition-opacity duration-200">${emoji}</span>`;
+
+                card.onclick = () => {
+                    if (flipped.length >= 2 || card.classList.contains('matched') || flipped.includes(card)) return;
+
+                    soundManager.playFlip();
+                    card.classList.add('bg-purple-600/40', 'border-pink-500');
+                    card.querySelector('span').classList.remove('opacity-0');
+                    flipped.push(card);
+
+                    if (flipped.length === 2) {
+                        moves++;
+                        document.getElementById('mem-moves').innerText = moves;
+
+                        const [c1, c2] = flipped;
+                        if (c1.dataset.emoji === c2.dataset.emoji) {
+                            soundManager.playSuccess();
+                            c1.classList.add('matched', 'border-emerald-500', 'bg-emerald-500/20');
+                            c2.classList.add('matched', 'border-emerald-500', 'bg-emerald-500/20');
+                            flipped = [];
+                            matched++;
+                            document.getElementById('mem-matched').innerText = matched;
+
+                            if (matched === icons.length) {
+                                confetti.launch(100);
+                                soundManager.playFanfare();
+                                app.addCoins(50);
+                                setTimeout(() => alert(`Победа! Вы нашли все пары за ${moves} ходов и получили 50 монет!`), 300);
+                            }
+                        } else {
+                            soundManager.playError();
+                            setTimeout(() => {
+                                c1.classList.remove('bg-purple-600/40', 'border-pink-500');
+                                c2.classList.remove('bg-purple-600/40', 'border-pink-500');
+                                c1.querySelector('span').classList.add('opacity-0');
+                                c2.querySelector('span').classList.add('opacity-0');
+                                flipped = [];
+                            }, 800);
+                        }
+                    }
+                };
+                grid.appendChild(card);
+            });
+        }
+
+        /* ==========================================================================
+           5. MINI-GAME 2: UGADAY CHISLO (GUESS THE NUMBER)
+           ========================================================================== */
+        function initGuessGame(container) {
+            const maxNum = 100;
+            const targetNum = Math.floor(Math.random() * maxNum) + 1;
+            let attempts = 0;
+
+            const html = `
+                <div class="w-full max-w-md mx-auto space-y-6 text-center">
+                    <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700">
+                        <p class="text-sm text-slate-300">Я загадал число от <span class="font-extrabold text-amber-400">1</span> до <span class="font-extrabold text-amber-400">${maxNum}</span>.</p>
+                        <p class="text-xs text-slate-400 mt-1">Используйте логику, чтобы угадать его за наименьшее число попыток.</p>
+                    </div>
+
+                    <div id="guess-feedback" class="h-16 flex items-center justify-center font-extrabold text-lg text-slate-300 bg-slate-900/60 rounded-2xl border border-slate-800">
+                        Сделайте первую попытку!
+                    </div>
+
+                    <div class="flex gap-2">
+                        <input type="number" id="guess-input" min="1" max="${maxNum}" placeholder="Введи число..." class="w-full bg-slate-900 border-2 border-purple-500/50 rounded-2xl px-4 py-3 text-center text-xl font-bold text-white focus:outline-none focus:border-pink-500">
+                        <button onclick="checkGuessNum()" class="btn-3d bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white font-extrabold px-6 py-3 rounded-2xl text-base">
+                            Проверить
+                        </button>
+                    </div>
+
+                    <div class="text-xs text-slate-400 font-bold">
+                        Попыток сделано: <span id="guess-attempts" class="text-amber-400">0</span>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+
+            window.checkGuessNum = () => {
+                const input = document.getElementById('guess-input');
+                const val = parseInt(input.value);
+                const feedback = document.getElementById('guess-feedback');
+
+                if (isNaN(val) || val < 1 || val > maxNum) {
+                    soundManager.playError();
+                    feedback.innerHTML = `<span class="text-amber-400">Введите число от 1 до ${maxNum}!</span>`;
+                    return;
+                }
+
+                attempts++;
+                document.getElementById('guess-attempts').innerText = attempts;
+
+                const diff = Math.abs(targetNum - val);
+
+                if (val === targetNum) {
+                    soundManager.playFanfare();
+                    confetti.launch(100);
+                    app.addCoins(40);
+                    feedback.innerHTML = `<span class="text-emerald-400">🎉 Бинго! Число ${targetNum}! Угадано за ${attempts} попыток (+40 монет)</span>`;
+                } else if (diff <= 5) {
+                    soundManager.playClick();
+                    feedback.innerHTML = `<span class="text-rose-500 animate-pulse">🔥 ОЧЕНЬ ГОРЯЧО! ${val < targetNum ? 'Бери больше' : 'Бери меньше'}</span>`;
+                } else if (diff <= 15) {
+                    soundManager.playClick();
+                    feedback.innerHTML = `<span class="text-amber-400">☀️ Тепло! ${val < targetNum ? 'Бери больше' : 'Бери меньше'}</span>`;
+                } else {
+                    soundManager.playClick();
+                    feedback.innerHTML = `<span class="text-blue-400">❄️ Холодно! ${val < targetNum ? 'Бери больше' : 'Бери меньше'}</span>`;
+                }
+                input.value = '';
+                input.focus();
+            };
+        }
+
+        /* ==========================================================================
+           6. MINI-GAME 3: PYATNASHKI (15-PUZZLE 4x4)
+           ========================================================================== */
+        function initFifteenGame(container) {
+            let tiles = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0];
+            let moves = 0;
+
+            // Shuffle solvable
+            for (let i = 0; i < 200; i++) {
+                const emptyIdx = tiles.indexOf(0);
+                const validMoves = [];
+                const row = Math.floor(emptyIdx / 4);
+                const col = emptyIdx % 4;
+
+                if (row > 0) validMoves.push(emptyIdx - 4);
+                if (row < 3) validMoves.push(emptyIdx + 4);
+                if (col > 0) validMoves.push(emptyIdx - 1);
+                if (col < 3) validMoves.push(emptyIdx + 1);
+
+                const randMove = validMoves[Math.floor(Math.random() * validMoves.length)];
+                [tiles[emptyIdx], tiles[randMove]] = [tiles[randMove], tiles[emptyIdx]];
+            }
+
+            const html = `
+                <div class="w-full max-w-sm mx-auto space-y-4 text-center">
+                    <div class="flex justify-between items-center bg-slate-800/80 p-3 rounded-xl border border-slate-700 text-sm font-bold">
+                        <span class="text-slate-300">Пятнашки 4x4</span>
+                        <span class="text-amber-400">Ходов: <span id="fif-moves">0</span></span>
+                    </div>
+                    <div id="fif-grid" class="grid grid-cols-4 gap-2 bg-slate-900/90 p-3 rounded-2xl border-2 border-slate-800 shadow-2xl"></div>
+                </div>
+            `;
+            container.innerHTML = html;
+
+            const renderGrid = () => {
+                const grid = document.getElementById('fif-grid');
+                grid.innerHTML = '';
+                tiles.forEach((num, idx) => {
+                    const tile = document.createElement('button');
+                    if (num === 0) {
+                        tile.className = 'h-16 rounded-xl bg-slate-950/40 border border-slate-800/50 pointer-events-none';
+                    } else {
+                        tile.className = 'h-16 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-700 hover:from-purple-500 hover:to-indigo-600 border border-purple-400/30 text-white font-extrabold text-xl shadow-md tile-slide flex items-center justify-center';
+                        tile.innerText = num;
+                        tile.onclick = () => moveTile(idx);
+                    }
+                    grid.appendChild(tile);
+                });
+            };
+
+            const moveTile = (idx) => {
+                const emptyIdx = tiles.indexOf(0);
+                const r1 = Math.floor(idx / 4), c1 = idx % 4;
+                const r2 = Math.floor(emptyIdx / 4), c2 = emptyIdx % 4;
+
+                if ((Math.abs(r1 - r2) === 1 && c1 === c2) || (Math.abs(c1 - c2) === 1 && r1 === r2)) {
+                    soundManager.playFlip();
+                    [tiles[idx], tiles[emptyIdx]] = [tiles[emptyIdx], tiles[idx]];
+                    moves++;
+                    document.getElementById('fif-moves').innerText = moves;
+                    renderGrid();
+                    checkWin();
+                } else {
+                    soundManager.playError();
+                }
+            };
+
+            const checkWin = () => {
+                const winState = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0];
+                if (tiles.every((val, i) => val === winState[i])) {
+                    soundManager.playFanfare();
+                    confetti.launch(100);
+                    app.addCoins(60);
+                    setTimeout(() => alert(`Поздравляем! Пятнашки собраны за ${moves} ходов! Награда: 60 монет.`), 200);
+                }
+            };
+
+            renderGrid();
+        }
+
+        /* ==========================================================================
+           7. MINI-GAME 4: SUDOKU (9x9)
+           ========================================================================== */
+        function initSudokuGame(container) {
+            // Preset 9x9 easy puzzle (0 = empty)
+            const initialBoard = [
+                [5,3,0,0,7,0,0,0,0],
+                [6,0,0,1,9,5,0,0,0],
+                [0,9,8,0,0,0,0,6,0],
+                [8,0,0,0,6,0,0,0,3],
+                [4,0,0,8,0,3,0,0,1],
+                [7,0,0,0,2,0,0,0,6],
+                [0,6,0,0,0,0,2,8,0],
+                [0,0,0,4,1,9,0,0,5],
+                [0,0,0,0,8,0,0,7,9]
+            ];
+
+            const solutionBoard = [
+                [5,3,4,6,7,8,9,1,2],
+                [6,7,2,1,9,5,3,4,8],
+                [1,9,8,3,4,2,5,6,7],
+                [8,5,9,7,6,1,4,2,3],
+                [4,2,6,8,5,3,7,9,1],
+                [7,1,3,9,2,4,8,5,6],
+                [9,6,1,5,3,7,2,8,4],
+                [2,8,7,4,1,9,6,3,5],
+                [3,4,5,2,8,6,1,7,9]
+            ];
+
+            let userBoard = JSON.parse(JSON.stringify(initialBoard));
+            let selectedCell = null;
+
+            const html = `
+                <div class="w-full max-w-lg mx-auto space-y-4 flex flex-col items-center">
+                    <div id="sudoku-board" class="grid grid-cols-9 gap-1 bg-slate-800 p-2 rounded-2xl border-2 border-slate-700 shadow-2xl"></div>
+                    
+                    <!-- Number Keypad -->
+                    <div class="grid grid-cols-5 sm:grid-cols-10 gap-2 w-full pt-2">
+                        ${[1,2,3,4,5,6,7,8,9].map(n => `<button onclick="fillSudokuNum(${n})" class="btn-3d h-11 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 rounded-xl font-extrabold text-lg">${n}</button>`).join('')}
+                        <button onclick="fillSudokuNum(0)" class="btn-3d h-11 bg-rose-600 hover:bg-rose-500 text-white rounded-xl font-bold text-xs">Стир</button>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+
+            const renderBoard = () => {
+                const boardElem = document.getElementById('sudoku-board');
+                boardElem.innerHTML = '';
+
+                for (let r = 0; r < 9; r++) {
+                    for (let c = 0; c < 9; c++) {
+                        const cell = document.createElement('button');
+                        const isOriginal = initialBoard[r][c] !== 0;
+                        const val = userBoard[r][c];
+
+                        let borderClass = 'border-slate-800';
+                        if (c % 3 === 2 && c < 8) borderClass += ' border-r-2 border-r-purple-500/50';
+                        if (r % 3 === 2 && r < 8) borderClass += ' border-b-2 border-b-purple-500/50';
+
+                        const isSelected = selectedCell && selectedCell.r === r && selectedCell.c === c;
+
+                        cell.className = `w-8 h-8 sm:w-10 sm:h-10 rounded-lg text-sm sm:text-base font-extrabold flex items-center justify-center transition border ${borderClass} ${
+                            isSelected ? 'bg-pink-600 text-white ring-2 ring-pink-300' :
+                            isOriginal ? 'bg-slate-900/90 text-amber-400 font-black cursor-default' :
+                            val !== 0 ? 'bg-purple-900/40 text-purple-200' : 'bg-slate-950/40 text-slate-500 hover:bg-slate-800'
+                        }`;
+
+                        cell.innerText = val !== 0 ? val : '';
+                        if (!isOriginal) {
+                            cell.onclick = () => {
+                                soundManager.playClick();
+                                selectedCell = { r, c };
+                                renderBoard();
+                            };
+                        }
+                        boardElem.appendChild(cell);
+                    }
+                }
+            };
+
+            window.fillSudokuNum = (num) => {
+                if (!selectedCell) return;
+                soundManager.playFlip();
+                const { r, c } = selectedCell;
+                userBoard[r][c] = num;
+                renderBoard();
+
+                // Check Win
+                let isComplete = true;
+                for (let i = 0; i < 9; i++) {
+                    for (let j = 0; j < 9; j++) {
+                        if (userBoard[i][j] !== solutionBoard[i][j]) {
+                            isComplete = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (isComplete) {
+                    soundManager.playFanfare();
+                    confetti.launch(100);
+                    app.addCoins(100);
+                    alert('Превосходно! Судоку успешно решено! Вы заработали 100 монет!');
+                }
+            };
+
+            renderBoard();
+        }
+
+        /* ==========================================================================
+           8. MINI-GAME 5: QUIZ (ШКОЛЬНАЯ ВИКТОРИНА)
+           ========================================================================== */
+        function initQuizGame(container) {
+            const questions = [
+                { q: "Какая планета самая большая в Солнечной системе?", opts: ["Марс", "Юпитер", "Сатурн", "Венера"], a: 1, exp: "Юпитер — крупнейшая планета нашей системы." },
+                { q: "Сколько будет 7 × 8?", opts: ["54", "56", "64", "48"], a: 1, exp: "7 умножить на 8 равно 56." },
+                { q: "Какой газ мы вдыхаем для жизни?", opts: ["Углекислый газ", "Водород", "Кислород", "Азот"], a: 2, exp: "Кислород необходим для дыхания живых организмов." },
+                { q: "Кто написал 'Сказку о царе Салтане'?", opts: ["А.С. Пушкин", "М.Ю. Лермонтов", "И.А. Крылов", "Н.А. Некрасов"], a: 0, exp: "Сказку написал Александр Сергеевич Пушкин." }
+            ];
+
+            let currentIdx = 0;
+            let score = 0;
+
+            const renderQ = () => {
+                if (currentIdx >= questions.length) {
+                    soundManager.playFanfare();
+                    confetti.launch(100);
+                    app.addCoins(score * 20);
+                    container.innerHTML = `
+                        <div class="text-center space-y-4">
+                            <div class="text-6xl">🎉</div>
+                            <h3 class="heading-font font-bold text-2xl text-white">Викторина завершена!</h3>
+                            <p class="text-slate-300">Ваш результат: <span class="text-amber-400 font-bold">${score} из ${questions.length}</span> правильных ответов.</p>
+                            <p class="text-emerald-400 font-bold">+${score * 20} Монет зачислено!</p>
+                            <button onclick="app.launchGame('quiz')" class="btn-3d bg-purple-600 hover:bg-purple-500 text-white font-bold px-6 py-2.5 rounded-2xl">Пройти снова</button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const item = questions[currentIdx];
+                const html = `
+                    <div class="w-full max-w-lg mx-auto space-y-6">
+                        <div class="flex justify-between items-center text-xs font-bold text-slate-400">
+                            <span>Вопрос ${currentIdx + 1} из ${questions.length}</span>
+                            <span class="text-amber-400">Очки: ${score}</span>
+                        </div>
+                        <div class="bg-slate-800/80 p-5 rounded-2xl border border-slate-700 text-center">
+                            <h4 class="font-extrabold text-lg sm:text-xl text-white">${item.q}</h4>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="quiz-opts">
+                            ${item.opts.map((opt, idx) => `
+                                <button onclick="answerQuiz(${idx})" class="btn-3d p-4 rounded-2xl bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700 text-white font-bold text-left transition">
+                                    ${opt}
+                                </button>
+                            `).join('')}
+                        </div>
+                        <div id="quiz-feedback" class="text-center text-sm font-bold min-h-[24px]"></div>
+                    </div>
+                `;
+                container.innerHTML = html;
+            };
+
+            window.answerQuiz = (selectedIdx) => {
+                const item = questions[currentIdx];
+                const feedback = document.getElementById('quiz-feedback');
+                const buttons = document.querySelectorAll('#quiz-opts button');
+
+                buttons.forEach(btn => btn.onclick = null); // Disable double click
+
+                if (selectedIdx === item.a) {
+                    soundManager.playSuccess();
+                    buttons[selectedIdx].classList.add('bg-emerald-600', 'border-emerald-400');
+                    feedback.innerHTML = `<span class="text-emerald-400">Правильно! ${item.exp}</span>`;
+                    score++;
+                } else {
+                    soundManager.playError();
+                    buttons[selectedIdx].classList.add('bg-rose-600', 'border-rose-400');
+                    buttons[item.a].classList.add('bg-emerald-600', 'border-emerald-400');
+                    feedback.innerHTML = `<span class="text-rose-400">Ошибка! ${item.exp}</span>`;
+                }
+
+                setTimeout(() => {
+                    currentIdx++;
+                    renderQ();
+                }, 1800);
+            };
+
+            renderQ();
+        }
+
+        /* ==========================================================================
+           9. MINI-GAME 6: POLE CHUDES (WHEEL OF FORTUNE)
+           ========================================================================== */
+        function initWheelGame(container) {
+            const secretWord = "ПОБЕДА";
+            let guessedLetters = [];
+            let currentScore = 0;
+            let isSpinning = false;
+
+            const html = `
+                <div class="w-full max-w-xl mx-auto space-y-6 text-center">
+                    <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700 flex justify-between items-center text-sm font-bold">
+                        <span>Тема: <span class="text-amber-400">Успех и школа</span></span>
+                        <span class="text-emerald-400">Счет: <span id="wheel-score">0</span> очков</span>
+                    </div>
+
+                    <!-- Hidden Word Board -->
+                    <div id="wheel-word-board" class="flex justify-center gap-2"></div>
+
+                    <!-- Wheel Graphic representation -->
+                    <div class="relative w-40 h-40 mx-auto rounded-full border-8 border-amber-500 bg-gradient-to-tr from-purple-600 via-pink-500 to-yellow-400 shadow-2xl flex items-center justify-center glow-effect">
+                        <button onclick="spinWheel()" id="spin-btn" class="btn-3d w-16 h-16 rounded-full bg-slate-900 border-2 border-amber-400 text-amber-300 font-extrabold text-xs flex items-center justify-center shadow-lg">
+                            КРУТИТЬ
+                        </button>
+                    </div>
+
+                    <!-- Keyboard -->
+                    <div id="wheel-keyboard" class="flex flex-wrap justify-center gap-1.5 max-w-md mx-auto"></div>
+                </div>
+            `;
+            container.innerHTML = html;
+
+            const renderWord = () => {
+                const board = document.getElementById('wheel-word-board');
+                board.innerHTML = '';
+                for (let char of secretWord) {
+                    const box = document.createElement('div');
+                    box.className = 'w-10 h-12 bg-slate-900 border-2 border-purple-500/60 rounded-xl flex items-center justify-center font-extrabold text-xl text-white shadow-md';
+                    box.innerText = guessedLetters.includes(char) ? char : '❓';
+                    board.appendChild(box);
+                }
+            };
+
+            const renderKeyboard = () => {
+                const kb = document.getElementById('wheel-keyboard');
+                const alphabet = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
+                kb.innerHTML = '';
+                for (let char of alphabet) {
+                    const btn = document.createElement('button');
+                    const isUsed = guessedLetters.includes(char);
+                    btn.className = `w-8 h-9 rounded-lg font-bold text-xs transition ${
+                        isUsed ? 'bg-slate-800 text-slate-600 cursor-not-allowed' : 'bg-slate-700 hover:bg-slate-600 text-white border border-slate-600'
+                    }`;
+                    btn.innerText = char;
+                    btn.disabled = isUsed;
+                    btn.onclick = () => guessLetter(char);
+                    kb.appendChild(btn);
+                }
+            };
+
+            window.spinWheel = () => {
+                if (isSpinning) return;
+                isSpinning = true;
+                soundManager.playSpin();
+
+                const sectors = [100, 200, 300, 500, 0, 1000];
+                const reward = sectors[Math.floor(Math.random() * sectors.length)];
+
+                setTimeout(() => {
+                    isSpinning = false;
+                    if (reward === 0) {
+                        soundManager.playError();
+                        alert('Сектор БАНКРОТ! Очки сброшены.');
+                        currentScore = 0;
+                    } else {
+                        soundManager.playSuccess();
+                        currentScore += reward;
+                        alert(`Выпал сектор +${reward} очков! Назовите букву.`);
+                    }
+                    document.getElementById('wheel-score').innerText = currentScore;
+                }, 600);
+            };
+
+            const guessLetter = (char) => {
+                soundManager.playFlip();
+                guessedLetters.push(char);
+                renderWord();
+                renderKeyboard();
+
+                if (secretWord.includes(char)) {
+                    soundManager.playSuccess();
+                } else {
+                    soundManager.playError();
+                }
+
+                // Check Win
+                if ([...secretWord].every(c => guessedLetters.includes(c))) {
+                    soundManager.playFanfare();
+                    confetti.launch(100);
+                    app.addCoins(100);
+                    setTimeout(() => alert(`ПОЛЕ ЧУДЕС! Вы разгадали слово "${secretWord}" и выиграли 100 монет!`), 300);
+                }
+            };
+
+            renderWord();
+            renderKeyboard();
+        }
+
+        /* ==========================================================================
+           10. MINI-GAME 7: MILLIONAIRE (КТО ХОЧЕТ СТАТЬ МИЛЛИОНЕРОМ)
+           ========================================================================== */
+        function initMillionaireGame(container) {
+            const ladder = [100, 200, 300, 500, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 125000, 250000, 500000, 1000000];
+            const questions = [
+                { q: "Сколько цветов в радуге?", opts: ["5", "6", "7", "8"], a: 2 },
+                { q: "Какая столица у России?", opts: ["Санкт-Петербург", "Москва", "Казань", "Сочи"], a: 1 },
+                { q: "Чему равен корень из 64?", opts: ["6", "7", "8", "9"], a: 2 }
+            ];
+
+            let step = 0;
+
+            const renderStep = () => {
+                if (step >= questions.length) {
+                    soundManager.playFanfare();
+                    confetti.launch(100);
+                    app.addCoins(200);
+                    container.innerHTML = `
+                        <div class="text-center space-y-4">
+                            <div class="text-6xl">💎</div>
+                            <h3 class="heading-font font-bold text-2xl text-amber-300">ВЫ МИЛЛИОНЕР!</h3>
+                            <p class="text-slate-300">Вы ответили на все вопросы и забираете главный приз!</p>
+                            <p class="text-emerald-400 font-extrabold text-lg">+200 Монет!</p>
+                            <button onclick="app.launchGame('millionaire')" class="btn-3d bg-purple-600 hover:bg-purple-500 text-white font-bold px-6 py-2.5 rounded-2xl">Сиграть снова</button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const item = questions[step];
+                const html = `
+                    <div class="w-full max-w-xl mx-auto space-y-6">
+                        <!-- Money Header -->
+                        <div class="bg-slate-900/90 p-4 rounded-2xl border border-amber-500/40 flex justify-between items-center">
+                            <span class="text-xs text-slate-400 font-bold">Вопрос ${step + 1} из ${questions.length}</span>
+                            <span class="text-amber-400 font-extrabold text-lg">${ladder[step]} Очков</span>
+                        </div>
+
+                        <!-- Question Box -->
+                        <div class="bg-gradient-to-r from-blue-900/60 to-purple-900/60 p-6 rounded-2xl border-2 border-purple-500/40 text-center">
+                            <h4 class="font-extrabold text-lg sm:text-xl text-white">${item.q}</h4>
+                        </div>
+
+                        <!-- Options -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="mil-opts">
+                            ${item.opts.map((opt, idx) => `
+                                <button onclick="answerMil(${idx})" class="btn-3d p-4 rounded-2xl bg-slate-900/80 hover:bg-purple-900/50 border border-slate-700 text-white font-bold text-left flex items-center gap-3">
+                                    <span class="text-amber-400 font-extrabold">${['A', 'B', 'C', 'D'][idx]}:</span>
+                                    <span>${opt}</span>
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                container.innerHTML = html;
+            };
+
+            window.answerMil = (selectedIdx) => {
+                const item = questions[step];
+                const buttons = document.querySelectorAll('#mil-opts button');
+
+                if (selectedIdx === item.a) {
+                    soundManager.playSuccess();
+                    buttons[selectedIdx].classList.add('bg-emerald-600', 'border-emerald-400');
+                    setTimeout(() => {
+                        step++;
+                        renderStep();
+                    }, 1200);
+                } else {
+                    soundManager.playError();
+                    buttons[selectedIdx].classList.add('bg-rose-600', 'border-rose-400');
+                    setTimeout(() => {
+                        alert('Неверный ответ! Игра окончена.');
+                        app.launchGame('millionaire');
+                    }, 800);
+                }
+            };
+
+            renderStep();
+        }
+
+        /* ==========================================================================
+           11. MINI-GAME 8: JEOPARDY (СВОЯ ИГРА)
+           ========================================================================== */
+        function initJeopardyGame(container) {
+            const categories = [
+                {
+                    name: "Литература",
+                    clues: [
+                        { pts: 100, q: "Кто написал 'Руслан и Людмила'?", a: "Пушкин" },
+                        { pts: 200, q: "Баснописец, писавший про Ворону и Лисицу", a: "Крылов" }
+                    ]
+                },
+                {
+                    name: "Природа",
+                    clues: [
+                        { pts: 100, q: "Самое глубокое озеро в мире", a: "Байкал" },
+                        { pts: 200, q: "Процесс создания кислорода растениями", a: "Фотосинтез" }
+                    ]
+                }
+            ];
+
+            let score = 0;
+
+            const renderBoard = () => {
+                const html = `
+                    <div class="w-full max-w-xl mx-auto space-y-4">
+                        <div class="flex justify-between items-center bg-slate-800/80 p-3 rounded-xl border border-slate-700 text-sm font-bold">
+                            <span class="text-purple-300">Своя Игра</span>
+                            <span class="text-amber-400">Счет: ${score} очков</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3" id="jeop-grid"></div>
+                    </div>
+                `;
+                container.innerHTML = html;
+
+                const grid = document.getElementById('jeop-grid');
+                categories.forEach(cat => {
+                    const col = document.createElement('div');
+                    col.className = 'space-y-2';
+                    col.innerHTML = `<div class="bg-purple-900/60 p-2 rounded-xl text-center font-extrabold text-sm text-pink-300 border border-purple-500/30">${cat.name}</div>`;
+
+                    cat.clues.forEach(clue => {
+                        const btn = document.createElement('button');
+                        btn.className = `w-full h-14 rounded-xl font-black text-lg transition btn-3d ${
+                            clue.solved ? 'bg-slate-900/40 text-slate-600 border border-slate-800 cursor-not-allowed' : 'bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700'
+                        }`;
+                        btn.innerText = clue.solved ? '—' : clue.pts;
+                        btn.disabled = clue.solved;
+                        btn.onclick = () => openClue(clue);
+                        col.appendChild(btn);
+                    });
+                    grid.appendChild(col);
+                });
+            };
+
+            const openClue = (clue) => {
+                soundManager.playFlip();
+                const userAns = prompt(`Вопрос на ${clue.pts} очков:\n${clue.q}`);
+                if (userAns && userAns.trim().toLowerCase() === clue.a.toLowerCase()) {
+                    soundManager.playSuccess();
+                    confetti.launch(50);
+                    score += clue.pts;
+                    app.addCoins(Math.floor(clue.pts / 2));
+                    alert('Правильно!');
+                } else if (userAns !== null) {
+                    soundManager.playError();
+                    score -= clue.pts;
+                    alert(`Неверно! Правильный ответ: ${clue.a}`);
+                }
+                clue.solved = true;
+                renderBoard();
+            };
+
+            renderBoard();
+        }
+
+        /* INITIALIZE APPLICATION ON LOAD */
+        let app;
+        window.addEventListener('DOMContentLoaded', () => {
+            app = new PortalApp();
+        });
+    </script>
+</body>
+</html>
+```
